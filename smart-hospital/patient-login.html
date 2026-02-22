@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Patient Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>👤 Patient Login</h1>
+    
+    <div class="form-container">
+      <div class="form-group">
+        <label>Mobile Number</label>
+        <input type="tel" id="mobile" placeholder="Enter registered mobile number">
+      </div>
+      
+      <div class="form-group">
+        <label>Date of Birth</label>
+        <input type="date" id="dob">
+      </div>
+      
+      <button class="submit-btn" onclick="patientLogin()">Login</button>
+      
+      <p style="text-align: center; margin-top: 20px; color: #666;">
+        <small>Login credentials provided by hospital staff</small>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    function patientLogin() {
+      const mobile = document.getElementById('mobile').value;
+      const dob = document.getElementById('dob').value;
+      
+      if (!mobile || !dob) {
+        alert('Please enter mobile number and date of birth');
+        return;
+      }
+      
+      // For demo - check if patient exists in localStorage
+      const patients = JSON.parse(localStorage.getItem('patients') || '[]');
+      const patient = patients.find(p => p.mobile === mobile);
+      
+      if (patient) {
+        localStorage.setItem('currentPatient', JSON.stringify(patient));
+        window.location.href = 'patient-profile.html';
+      } else {
+        alert('Patient not found. Please check mobile number.');
+      }
+    }
+  </script>
+</body>
+</html>

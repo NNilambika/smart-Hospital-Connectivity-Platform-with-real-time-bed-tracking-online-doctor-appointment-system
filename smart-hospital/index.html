@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Hospital - Find Care Instantly</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Add Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* Quick fix for modal display */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      overflow-y: auto;
+    }
+    
+    .modal.show {
+      display: block;
+    }
+    
+    .modal-content {
+      background-color: #fefefe;
+      margin: 30px auto;
+      padding: 0;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 600px;
+      position: relative;
+      animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes slideDown {
+      from {
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    /* Ensure form is visible when modal is open */
+    .register-modal {
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <!-- Emergency Floating Button -->
+  <div class="emergency-floating-btn" onclick="emergencyCall()">
+    <i class="fas fa-ambulance"></i>
+    <span class="emergency-tooltip">Emergency? Call 108</span>
+  </div>
+
+  <!-- Top Navigation Bar with Register Button -->
+  <div class="top-nav">
+    <div class="nav-container">
+      <div class="logo">
+        <i class="fas fa-hospital-alt"></i>
+        <span>Smart<span class="highlight">Hospital</span></span>
+      </div>
+      <div class="nav-buttons">
+        <button class="register-hospital-btn" onclick="openRegisterModal()">
+          <i class="fas fa-plus-circle"></i> Register Your Hospital
+        </button>
+        <button class="admin-login-btn" onclick="window.location.href='management-login.html'">
+          <i class="fas fa-user-md"></i> Staff Login
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero Section with Animated Background -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1 class="hero-title">
+        <span class="title-word">Find</span>
+        <span class="title-word">Hospitals</span>
+        <span class="title-word">Near</span>
+        <span class="title-word">You</span>
+      </h1>
+      <p class="hero-subtitle">Real-time bed availability • Emergency ambulance • Trusted healthcare</p>
+      
+      <!-- Quick Stats -->
+      <div class="quick-stats">
+        <div class="stat-item">
+          <span class="stat-number" id="totalHospitalsCount">0</span>
+          <span class="stat-label">Hospitals</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" id="availableBedsCount">0</span>
+          <span class="stat-label">Available Beds</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" id="ambulanceCount">0</span>
+          <span class="stat-label">Ambulances</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Animated Wave -->
+    <div class="wave wave1"></div>
+    <div class="wave wave2"></div>
+    <div class="wave wave3"></div>
+  </section>
+
+  <!-- Main Container -->
+  <div class="container">
+    <!-- Search Section with Advanced Filters -->
+    <div class="search-section">
+      <div class="search-container">
+        <i class="fas fa-search search-icon"></i>
+        <input 
+          type="text" 
+          id="searchHospital" 
+          placeholder="Search by hospital name, location..." 
+          onkeyup="searchHospitals()"
+          autocomplete="off"
+        >
+        <button class="search-btn" onclick="searchHospitals()">Search</button>
+      </div>
+
+      <!-- Filter Chips -->
+      <div class="filter-chips">
+        <button class="chip active" onclick="filterHospitals('all')">
+          <i class="fas fa-hospital"></i> All Hospitals
+        </button>
+        <button class="chip" onclick="filterHospitals('available')">
+          <i class="fas fa-check-circle"></i> Available Now
+        </button>
+        <button class="chip" onclick="filterHospitals('emergency')">
+          <i class="fas fa-ambulance"></i> 24/7 Emergency
+        </button>
+        <button class="chip" onclick="filterHospitals('icu')">
+          <i class="fas fa-heartbeat"></i> ICU Available
+        </button>
+        <button class="chip" onclick="filterHospitals('nearby')">
+          <i class="fas fa-location-dot"></i> Nearest First
+        </button>
+      </div>
+    </div>
+
+    <!-- Hospital Stats Bar -->
+    <div class="hospital-stats-bar">
+      <div class="stat-card-small">
+        <i class="fas fa-bed green"></i>
+        <span>Available Beds: <strong id="totalAvailable">0</strong></span>
+      </div>
+      <div class="stat-card-small">
+        <i class="fas fa-ambulance red"></i>
+        <span>Ambulances Ready: <strong id="totalAmbulances">0</strong></span>
+      </div>
+      <div class="stat-card-small">
+        <i class="fas fa-clock orange"></i>
+        <span>Avg Wait Time: <strong id="avgWaitTime">15 min</strong></span>
+      </div>
+    </div>
+
+    <!-- Results Info -->
+    <div class="results-header">
+      <div class="hospital-count" id="hospitalCount">
+        <span id="showingCount">0</span> hospitals found
+      </div>
+    </div>
+
+    <!-- Hospital Grid -->
+    <div id="hospitalList" class="hospital-grid">
+      <!-- Hospitals will be loaded here dynamically -->
+      <div class="loading-spinner">
+        <i class="fas fa-spinner fa-spin"></i> Loading hospitals...
+      </div>
+    </div>
+
+    <!-- Load More Button -->
+    <div class="load-more-container">
+      <button class="load-more-btn" onclick="loadMoreHospitals()" id="loadMoreBtn">
+        Load More Hospitals <i class="fas fa-arrow-down"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Hospital Registration Modal (Hidden by default) -->
+  <div id="registerModal" class="modal">
+    <div class="modal-content register-modal">
+      <div class="modal-header">
+        <h2><i class="fas fa-hospital"></i> Register Your Hospital</h2>
+        <span class="close" onclick="closeRegisterModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <form id="hospitalRegisterForm" onsubmit="event.preventDefault(); registerHospital();">
+          <!-- Hospital Basic Info -->
+          <div class="form-section">
+            <h3>Hospital Information</h3>
+            <div class="form-group">
+              <label><i class="fas fa-building"></i> Hospital Name *</label>
+              <input type="text" id="hospitalName" placeholder="Enter hospital name" required>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-map-marker-alt"></i> City *</label>
+                <input type="text" id="hospitalCity" placeholder="City" required>
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-location-dot"></i> State *</label>
+                <input type="text" id="hospitalState" placeholder="State" required>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label><i class="fas fa-address-card"></i> Full Address *</label>
+              <textarea id="hospitalAddress" rows="2" placeholder="Street address, landmark, pincode" required></textarea>
+            </div>
+          </div>
+
+          <!-- Contact Information -->
+          <div class="form-section">
+            <h3>Contact Information</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-phone"></i> Phone Number *</label>
+                <input type="tel" id="hospitalPhone" placeholder="Landline with STD code" required>
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-mobile-alt"></i> Mobile (Emergency)</label>
+                <input type="tel" id="hospitalMobile" placeholder="Emergency contact number">
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label><i class="fas fa-envelope"></i> Email *</label>
+              <input type="email" id="hospitalEmail" placeholder="Official email address" required>
+            </div>
+          </div>
+
+          <!-- Bed Information -->
+          <div class="form-section">
+            <h3>Bed Availability</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-bed"></i> General Ward Beds *</label>
+                <input type="number" id="generalBeds" placeholder="Total general beds" min="0" required>
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-heartbeat"></i> ICU Beds *</label>
+                <input type="number" id="icuBeds" placeholder="Total ICU beds" min="0" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ambulance Information -->
+          <div class="form-section">
+            <h3><i class="fas fa-ambulance"></i> Ambulance Services</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Number of Ambulances *</label>
+                <input type="number" id="ambulanceCount" placeholder="Total ambulances" min="0" required>
+              </div>
+              <div class="form-group">
+                <label>Ambulance Contact *</label>
+                <input type="tel" id="ambulancePhone" placeholder="Ambulance dispatch number" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>24/7 Emergency?</label>
+              <select id="emergency247">
+                <option value="yes">Yes - 24/7 Emergency Available</option>
+                <option value="no">No - Limited Hours</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Login Credentials -->
+          <div class="form-section highlight-section">
+            <h3><i class="fas fa-lock"></i> Login Credentials (For Hospital Management)</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-user"></i> Admin Email *</label>
+                <input type="email" id="adminEmail" placeholder="Admin email" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-lock"></i> Password *</label>
+                <input type="password" id="adminPassword" placeholder="Create password" required>
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-lock"></i> Confirm Password *</label>
+                <input type="password" id="confirmPassword" placeholder="Confirm password" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- Terms -->
+          <div class="form-group terms">
+            <input type="checkbox" id="terms" required>
+            <label>I confirm that all information provided is accurate</label>
+          </div>
+
+          <button type="submit" class="register-submit-btn">
+            <i class="fas fa-check-circle"></i> Register Hospital
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div id="successModal" class="modal">
+    <div class="modal-content success-modal">
+      <div class="success-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <h2>Registration Successful!</h2>
+      <p>Your hospital has been registered successfully.</p>
+      <div class="credentials-box">
+        <p><strong>Hospital:</strong> <span id="successHospitalName"></span></p>
+        <p><strong>Admin Email:</strong> <span id="successAdminEmail"></span></p>
+        <p><strong>Login:</strong> Use these credentials to access management dashboard</p>
+      </div>
+      <button class="success-btn" onclick="closeSuccessModal()">
+        <i class="fas fa-check"></i> Got it
+      </button>
+    </div>
+  </div>
+
+  <!-- Location Modal (for ambulance) -->
+  <div id="locationModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2><i class="fas fa-location-dot"></i> Share Your Location</h2>
+        <span class="close" onclick="closeModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p>We'll send the nearest ambulance to your location</p>
+        <div id="locationStatus" class="location-status"></div>
+        <button class="location-btn" onclick="getLocation()">
+          <i class="fas fa-share"></i> Share My Location
+        </button>
+        <button class="emergency-call-btn" onclick="callAmbulance('108')">
+          <i class="fas fa-phone-alt"></i> Direct Call 108
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="script.js"></script>
+  
+  <script>
+    // Modal functions - Open registration form only when button clicked
+    window.openRegisterModal = function() {
+      document.getElementById('registerModal').style.display = 'block';
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    };
+    
+    window.closeRegisterModal = function() {
+      document.getElementById('registerModal').style.display = 'none';
+      document.body.style.overflow = 'auto'; // Restore scrolling
+    };
+    
+    window.closeSuccessModal = function() {
+      document.getElementById('successModal').style.display = 'none';
+      document.body.style.overflow = 'auto';
+    };
+    
+    // Emergency call function
+    window.emergencyCall = function() {
+      document.getElementById('locationModal').style.display = 'block';
+    };
+    
+    window.closeModal = function() {
+      document.getElementById('locationModal').style.display = 'none';
+    };
+    
+    // Register hospital function
+    window.registerHospital = function() {
+      // Get all form values
+      const hospitalName = document.getElementById('hospitalName').value;
+      const password = document.getElementById('adminPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const terms = document.getElementById('terms').checked;
+      // Register hospital function
+window.registerHospital = async function() {
+  try {
+    // Get all form values
+    const hospitalName = document.getElementById('hospitalName')?.value;
+    const hospitalCity = document.getElementById('hospitalCity')?.value;
+    const hospitalState = document.getElementById('hospitalState')?.value;
+    const hospitalAddress = document.getElementById('hospitalAddress')?.value;
+    const hospitalPhone = document.getElementById('hospitalPhone')?.value;
+    const hospitalMobile = document.getElementById('hospitalMobile')?.value;
+    const hospitalEmail = document.getElementById('hospitalEmail')?.value;
+    const generalBeds = parseInt(document.getElementById('generalBeds')?.value) || 0;
+    const icuBeds = parseInt(document.getElementById('icuBeds')?.value) || 0;
+    const ambulanceCount = parseInt(document.getElementById('ambulanceCount')?.value) || 1;
+    const ambulancePhone = document.getElementById('ambulancePhone')?.value;
+    const emergency247 = document.getElementById('emergency247')?.value;
+    const adminEmail = document.getElementById('adminEmail')?.value;
+    const password = document.getElementById('adminPassword')?.value;
+    const confirmPassword = document.getElementById('confirmPassword')?.value;
+    const terms = document.getElementById('terms')?.checked;
+    
+    // Validation code here...
+    
+    // Create hospital document in Firestore
+    const hospitalData = {
+      name: hospitalName,
+      city: hospitalCity,
+      state: hospitalState,
+      address: hospitalAddress,
+      phone: hospitalPhone,
+      mobile: hospitalMobile || '',
+      email: hospitalEmail,
+      general_available: generalBeds,
+      icu_available: icuBeds,
+      ambulance_count: ambulanceCount,
+      ambulance_number: ambulancePhone || "108",
+      ambulance_available: true,
+      emergency_247: emergency247 === 'yes',
+      status: "approved",
+      registeredDate: new Date().toISOString(),
+      createdBy: adminEmail  // ← ADD THIS LINE HERE
+    };
+    
+    // Rest of your code...
+    
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
+      
+      // Validation
+      if (!hospitalName) {
+        alert('Please enter hospital name');
+        return;
+      }
+      
+      if (!password) {
+        alert('Please enter password');
+        return;
+      }
+      
+      if (password !== confirmPassword) {
+        alert('Passwords do not match');
+        return;
+      }
+      
+      if (password.length < 6) {
+        alert('Password must be at least 6 characters');
+        return;
+      }
+      
+      if (!terms) {
+        alert('Please accept the terms');
+        return;
+      }
+      
+      // In real app, save to Firebase here
+      // For demo, show success
+      
+      // Show success modal
+      document.getElementById('successHospitalName').textContent = hospitalName;
+      document.getElementById('successAdminEmail').textContent = document.getElementById('adminEmail').value;
+      
+      closeRegisterModal();
+      document.getElementById('successModal').style.display = 'block';
+      
+      // Reset form
+      document.getElementById('hospitalRegisterForm').reset();
+    };
+    
+    // Get user location
+    window.getLocation = function() {
+      const status = document.getElementById('locationStatus');
+      
+      if (navigator.geolocation) {
+        status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting your location...';
+        navigator.geolocation.getCurrentPosition(showPosition, showError);
+      } else {
+        status.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Geolocation not supported';
+      }
+    };
+    
+    function showPosition(position) {
+      const status = document.getElementById('locationStatus');
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      
+      status.innerHTML = `
+        <div class="location-success">
+          <i class="fas fa-check-circle"></i> Location found!
+          <div class="coordinates">${lat.toFixed(4)}, ${lng.toFixed(4)}</div>
+        </div>
+        <button class="call-btn" onclick="callAmbulance('108', ${lat}, ${lng})">
+          <i class="fas fa-ambulance"></i> Confirm & Call Ambulance
+        </button>
+      `;
+    }
+    
+    function showError(error) {
+      const status = document.getElementById('locationStatus');
+      let message = '';
+      switch(error.code) {
+        case error.PERMISSION_DENIED:
+          message = '❌ Please allow location access';
+          break;
+        case error.POSITION_UNAVAILABLE:
+          message = '❌ Location unavailable';
+          break;
+        case error.TIMEOUT:
+          message = '❌ Location request timeout';
+          break;
+      }
+      status.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+    }
+    
+    window.callAmbulance = function(number, lat, lng) {
+      if (confirm(`🚑 Call ambulance at ${number}?`)) {
+        window.location.href = `tel:${number}`;
+        if (lat && lng) {
+          console.log(`Sending ambulance to: ${lat}, ${lng}`);
+        }
+      }
+    };
+    
+    // Filter functions
+    window.filterHospitals = function(filter) {
+      document.querySelectorAll('.chip').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      // Filter logic will be in script.js
+    };
+    
+    window.searchHospitals = function() {
+      // Search logic in script.js
+    };
+    
+    window.loadMoreHospitals = function() {
+      // Load more logic in script.js
+    };
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const registerModal = document.getElementById('registerModal');
+      const locationModal = document.getElementById('locationModal');
+      const successModal = document.getElementById('successModal');
+      
+      if (event.target == registerModal) {
+        closeRegisterModal();
+      }
+      if (event.target == locationModal) {
+        closeModal();
+      }
+      if (event.target == successModal) {
+        closeSuccessModal();
+      }
+    };
+    
+    // Ensure modals are hidden on page load
+    window.onload = function() {
+      document.getElementById('registerModal').style.display = 'none';
+      document.getElementById('locationModal').style.display = 'none';
+      document.getElementById('successModal').style.display = 'none';
+    };
+  </script>
+
+<!-- Debug button - remove after testing -->
+<div style="position: fixed; bottom: 20px; left: 20px; z-index: 9999; background: white; padding: 10px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+  <button onclick="console.log('All hospitals:', allHospitals); alert('Check console (F12) for hospital data')" style="background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 3px; margin-right: 5px;">
+    Debug: Log Hospitals
+  </button>
+  <button onclick="addSampleHospitals()" style="background: #27ae60; color: white; border: none; padding: 5px 10px; border-radius: 3px;">
+    Add Samples
+  </button>
+</div>
+</body>
+</html>

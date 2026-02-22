@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - LifeLink 24/7</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #f0f4f8;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .dashboard-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    /* Header Styles */
+    .admin-header {
+      background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 10px 30px rgba(155,89,182,0.3);
+    }
+    
+    .admin-info h1 {
+      font-size: 2.2em;
+      margin-bottom: 10px;
+    }
+    
+    .admin-info p {
+      font-size: 1.1em;
+      opacity: 0.9;
+    }
+    
+    .admin-badge {
+      background: rgba(255,255,255,0.2);
+      padding: 8px 15px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-top: 10px;
+    }
+    
+    .logout-btn {
+      padding: 12px 30px;
+      background: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+    
+    .logout-btn:hover {
+      background: #c0392b;
+      transform: translateY(-2px);
+    }
+    
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin: 30px 0;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      text-align: center;
+      transition: transform 0.3s;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+    
+    .stat-icon {
+      font-size: 2.5em;
+      color: #9b59b6;
+      margin-bottom: 15px;
+    }
+    
+    .stat-number {
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #2c3e50;
+      margin: 10px 0;
+    }
+    
+    .stat-label {
+      color: #666;
+      font-size: 1em;
+    }
+    
+    /* Section Styles */
+    .section {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin: 30px 0;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .section-title {
+      color: #2c3e50;
+      margin-bottom: 20px;
+      font-size: 1.5em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .section-title i {
+      color: #9b59b6;
+    }
+    
+    /* Hospital Grid */
+    .hospital-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .hospital-card {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      border-left: 4px solid #9b59b6;
+      transition: transform 0.3s;
+    }
+    
+    .hospital-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .hospital-name {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+    
+    .hospital-details {
+      color: #666;
+      margin: 5px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .hospital-details i {
+      width: 20px;
+      color: #9b59b6;
+    }
+    
+    .hospital-stats {
+      display: flex;
+      justify-content: space-between;
+      margin: 15px 0;
+      padding: 10px 0;
+      border-top: 1px solid #e0e0e0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .stat-item {
+      text-align: center;
+    }
+    
+    .stat-item span {
+      display: block;
+    }
+    
+    .stat-item .number {
+      font-size: 1.3em;
+      font-weight: bold;
+      color: #27ae60;
+    }
+    
+    /* Doctor Grid */
+    .doctor-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .doctor-card {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      border-left: 4px solid #3498db;
+    }
+    
+    .doctor-name {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 5px;
+    }
+    
+    .doctor-specialization {
+      color: #3498db;
+      margin-bottom: 10px;
+    }
+    
+    .doctor-hospital {
+      color: #666;
+      font-size: 0.9em;
+      margin: 5px 0;
+    }
+    
+    /* Tabs */
+    .admin-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 25px;
+      background: #f0f4f8;
+      padding: 5px;
+      border-radius: 10px;
+    }
+    
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      color: #666;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .tab-btn.active {
+      background: white;
+      color: #9b59b6;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    /* Action Buttons */
+    .action-btn {
+      padding: 10px 20px;
+      background: #9b59b6;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin: 10px 0;
+    }
+    
+    .action-btn:hover {
+      background: #8e44ad;
+    }
+    
+    .refresh-btn {
+      padding: 10px 20px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .refresh-btn:hover {
+      background: #2980b9;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Header -->
+    <div class="admin-header">
+      <div class="admin-info">
+        <h1><i class="fas fa-user-tie"></i> Admin Dashboard</h1>
+        <p>Welcome, <span id="adminName">Admin</span> | <span id="adminRole">superadmin</span></p>
+        <div class="admin-badge">
+          <i class="fas fa-shield-alt"></i> System Administrator
+        </div>
+      </div>
+      <button class="logout-btn" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-hospital"></i></div>
+        <div class="stat-number" id="totalHospitals">0</div>
+        <div class="stat-label">Total Hospitals</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-user-md"></i></div>
+        <div class="stat-number" id="totalDoctors">0</div>
+        <div class="stat-label">Total Doctors</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-users"></i></div>
+        <div class="stat-number" id="totalPatients">0</div>
+        <div class="stat-label">Total Patients</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+        <div class="stat-number" id="totalAppointments">0</div>
+        <div class="stat-label">Today's Appointments</div>
+      </div>
+    </div>
+
+    <!-- Admin Tabs -->
+    <div class="admin-tabs">
+      <button class="tab-btn active" onclick="switchTab('hospitals')">
+        <i class="fas fa-hospital"></i> Hospitals
+      </button>
+      <button class="tab-btn" onclick="switchTab('doctors')">
+        <i class="fas fa-user-md"></i> All Doctors
+      </button>
+      <button class="tab-btn" onclick="switchTab('system')">
+        <i class="fas fa-cog"></i> System Settings
+      </button>
+    </div>
+
+    <!-- Hospitals Tab -->
+    <div id="hospitalsTab" class="tab-content active">
+      <div class="section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 class="section-title"><i class="fas fa-building"></i> Registered Hospitals</h2>
+          <button class="refresh-btn" onclick="loadHospitals()">
+            <i class="fas fa-sync-alt"></i> Refresh
+          </button>
+        </div>
+        <div id="hospitalsList" class="hospital-grid">
+          <p style="text-align: center; color: #666; padding: 40px;">Loading hospitals...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Doctors Tab -->
+    <div id="doctorsTab" class="tab-content">
+      <div class="section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 class="section-title"><i class="fas fa-user-md"></i> All Doctors</h2>
+          <button class="refresh-btn" onclick="loadAllDoctors()">
+            <i class="fas fa-sync-alt"></i> Refresh
+          </button>
+        </div>
+        <div id="doctorsList" class="doctor-grid">
+          <p style="text-align: center; color: #666; padding: 40px;">Loading doctors...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- System Settings Tab -->
+    <div id="systemTab" class="tab-content">
+      <div class="section">
+        <h2 class="section-title"><i class="fas fa-cog"></i> System Settings</h2>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+          <h3><i class="fas fa-database"></i> Database Statistics</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+            <div style="background: white; padding: 15px; border-radius: 8px;">
+              <strong>LocalStorage Keys:</strong> <span id="storageCount">0</span>
+            </div>
+            <div style="background: white; padding: 15px; border-radius: 8px;">
+              <strong>Hospitals Registered:</strong> <span id="storageHospitals">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+          <h3><i class="fas fa-trash"></i> Maintenance</h3>
+          <button class="action-btn" onclick="clearAllData()">
+            <i class="fas fa-trash-alt"></i> Clear All Data (Demo)
+          </button>
+          <p style="color: #e74c3c; margin-top: 10px; font-size: 0.9em;">
+            ⚠️ This will remove all hospitals, doctors, and appointments data
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ====================================
+    // CHECK ADMIN LOGIN
+    // ====================================
+    if (!localStorage.getItem('isAdminLoggedIn')) {
+      window.location.href = 'admin-login.html';
+    }
+
+    // ====================================
+    // GET ADMIN INFO
+    // ====================================
+    const adminName = localStorage.getItem('adminName') || 'Admin';
+    const adminRole = localStorage.getItem('adminRole') || 'superadmin';
+    
+    document.getElementById('adminName').textContent = adminName;
+    document.getElementById('adminRole').textContent = adminRole;
+
+    // ====================================
+    // TAB SWITCHING
+    // ====================================
+    window.switchTab = function(tab) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      document.getElementById('hospitalsTab').classList.remove('active');
+      document.getElementById('doctorsTab').classList.remove('active');
+      document.getElementById('systemTab').classList.remove('active');
+      
+      if (tab === 'hospitals') {
+        document.getElementById('hospitalsTab').classList.add('active');
+        loadHospitals();
+      } else if (tab === 'doctors') {
+        document.getElementById('doctorsTab').classList.add('active');
+        loadAllDoctors();
+      } else if (tab === 'system') {
+        document.getElementById('systemTab').classList.add('active');
+        loadSystemStats();
+      }
+    };
+
+    // ====================================
+    // LOAD ALL HOSPITALS
+    // ====================================
+    window.loadHospitals = function() {
+      const hospitalsList = document.getElementById('hospitalsList');
+      const hospitals = [];
+      
+      // Find all hospital data in localStorage
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.includes('hospital') || key.includes('hosp_')) {
+          try {
+            const data = JSON.parse(localStorage.getItem(key));
+            if (Array.isArray(data)) {
+              // This is bed data or appointment data
+            } else if (data && data.name) {
+              hospitals.push(data);
+            }
+          } catch (e) {
+            // Not JSON, skip
+          }
+        }
+      }
+      
+      // Add demo hospitals if none found
+      if (hospitals.length === 0) {
+        hospitals.push(
+          { name: 'Sanjivini Hospital', city: 'Bangalore', phone: '080-23456789', beds: 45 },
+          { name: 'Health Care+', city: 'Mumbai', phone: '022-34567890', beds: 60 },
+          { name: 'Veda Hospital', city: 'Delhi', phone: '011-45678901', beds: 35 }
+        );
+      }
+      
+      document.getElementById('totalHospitals').textContent = hospitals.length;
+      
+      if (hospitals.length === 0) {
+        hospitalsList.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">No hospitals found</p>';
+        return;
+      }
+      
+      hospitalsList.innerHTML = hospitals.map(hospital => `
+        <div class="hospital-card">
+          <div class="hospital-name">🏥 ${hospital.name}</div>
+          <div class="hospital-details">
+            <i class="fas fa-map-marker-alt"></i> ${hospital.city || 'City not specified'}
+          </div>
+          <div class="hospital-details">
+            <i class="fas fa-phone"></i> ${hospital.phone || 'Phone not available'}
+          </div>
+          <div class="hospital-stats">
+            <div class="stat-item">
+              <span class="number">${hospital.beds || 30}</span>
+              <span>Total Beds</span>
+            </div>
+            <div class="stat-item">
+              <span class="number">${Math.floor((hospital.beds || 30) * 0.7)}</span>
+              <span>Available</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    };
+
+    // ====================================
+    // LOAD ALL DOCTORS
+    // ====================================
+    window.loadAllDoctors = function() {
+      const doctorsList = document.getElementById('doctorsList');
+      let allDoctors = [];
+      
+      // Find all doctor data in localStorage
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.includes('doctor')) {
+          try {
+            const doctors = JSON.parse(localStorage.getItem(key));
+            if (Array.isArray(doctors)) {
+              allDoctors = [...allDoctors, ...doctors];
+            }
+          } catch (e) {}
+        }
+      }
+      
+      document.getElementById('totalDoctors').textContent = allDoctors.length;
+      
+      if (allDoctors.length === 0) {
+        doctorsList.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">No doctors found</p>';
+        return;
+      }
+      
+      doctorsList.innerHTML = allDoctors.map(doctor => `
+        <div class="doctor-card">
+          <div class="doctor-name">👨‍⚕️ Dr. ${doctor.name}</div>
+          <div class="doctor-specialization">${doctor.specialization}</div>
+          <div class="doctor-hospital">
+            <i class="fas fa-hospital"></i> ${doctor.hospitalName || 'Hospital'}
+          </div>
+          <div style="margin-top: 10px;">
+            <span class="doctor-status ${doctor.status === 'present' ? 'status-present' : 'status-absent'}">
+              ${doctor.status === 'present' ? '✅ Available' : '❌ Not Available'}
+            </span>
+          </div>
+        </div>
+      `).join('');
+    };
+
+    // ====================================
+    // LOAD SYSTEM STATISTICS
+    // ====================================
+    window.loadSystemStats = function() {
+      let hospitalCount = 0;
+      let doctorCount = 0;
+      let appointmentCount = 0;
+      
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.includes('hospital')) hospitalCount++;
+        if (key.includes('doctor')) {
+          try {
+            const doctors = JSON.parse(localStorage.getItem(key));
+            if (Array.isArray(doctors)) {
+              doctorCount += doctors.length;
+            }
+          } catch (e) {}
+        }
+        if (key.includes('appointment')) appointmentCount++;
+      }
+      
+      document.getElementById('storageCount').textContent = localStorage.length;
+      document.getElementById('storageHospitals').textContent = hospitalCount;
+      document.getElementById('totalPatients').textContent = '156';
+      document.getElementById('totalAppointments').textContent = appointmentCount;
+    };
+
+    // ====================================
+    // CLEAR ALL DATA (Demo)
+    // ====================================
+    window.clearAllData = function() {
+      if (confirm('⚠️ Are you sure? This will delete ALL hospital, doctor, and appointment data!')) {
+        const keysToKeep = ['adminId', 'adminName', 'adminRole', 'isAdminLoggedIn'];
+        
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const key = localStorage.key(i);
+          if (!keysToKeep.includes(key)) {
+            localStorage.removeItem(key);
+          }
+        }
+        
+        alert('✅ All data cleared! Refresh the page.');
+        loadHospitals();
+        loadAllDoctors();
+        loadSystemStats();
+      }
+    };
+
+    // ====================================
+    // LOGOUT
+    // ====================================
+    window.logout = function() {
+      localStorage.removeItem('isAdminLoggedIn');
+      localStorage.removeItem('adminId');
+      localStorage.removeItem('adminName');
+      localStorage.removeItem('adminRole');
+      window.location.href = 'admin-login.html';
+    };
+
+    // ====================================
+    // INITIALIZE
+    // ====================================
+    loadHospitals();
+    loadAllDoctors();
+    loadSystemStats();
+  </script>
+</body>
+</html>
