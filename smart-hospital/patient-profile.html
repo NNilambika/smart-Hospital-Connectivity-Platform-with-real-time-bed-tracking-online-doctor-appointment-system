@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Health Profile</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>👤 My Health Profile</h1>
+    
+    <div id="patientProfile">
+      <!-- Loaded dynamically -->
+    </div>
+    
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+
+  <script>
+    function loadPatientProfile() {
+      const patient = JSON.parse(localStorage.getItem('currentPatient'));
+      const profileDiv = document.getElementById('patientProfile');
+      
+      if (!patient) {
+        profileDiv.innerHTML = '<p>No patient data found</p>';
+        return;
+      }
+      
+      profileDiv.innerHTML = `
+        <div class="patient-header">
+          <h2>${patient.name}</h2>
+          <p>Age: ${patient.age} | Gender: ${patient.gender}</p>
+          <p>Mobile: ${patient.mobile}</p>
+        </div>
+        
+        <div class="section">
+          <h3>🏥 Hospital Information</h3>
+          <div class="info-card">
+            <p><strong>Admission Date:</strong> ${patient.admissionDate}</p>
+            <p><strong>Attending Doctor:</strong> ${patient.doctor}</p>
+            <p><strong>Bed Number:</strong> ${patient.bed}</p>
+          </div>
+        </div>
+        
+        <div class="section">
+          <h3>📊 Current Vitals</h3>
+          <div class="vitals-monitor">
+            <div class="vital-card">
+              <h4>Blood Pressure</h4>
+              <p class="vital-value">${patient.vitals.bp}</p>
+            </div>
+            <div class="vital-card">
+              <h4>Heart Rate</h4>
+              <p class="vital-value">${patient.vitals.heartRate}</p>
+            </div>
+            <div class="vital-card">
+              <h4>Blood Sugar</h4>
+              <p class="vital-value">${patient.vitals.bloodSugar}</p>
+            </div>
+            <div class="vital-card">
+              <h4>Temperature</h4>
+              <p class="vital-value">${patient.vitals.temperature}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="section">
+          <h3>📋 Diagnosis & Treatment</h3>
+          <div class="info-card">
+            <p><strong>Diagnosis:</strong> ${patient.diagnosis || 'Under observation'}</p>
+            <p><strong>Treatment Plan:</strong> ${patient.treatment || 'To be determined'}</p>
+          </div>
+        </div>
+        
+        <div class="section">
+          <h3>📄 Medical Documents</h3>
+          <div class="documents-list">
+            <div class="document-item">
+              <span>📊 Blood Report - ${new Date().toLocaleDateString()}</span>
+              <button class="small-btn" onclick="alert('Viewing blood report')">View</button>
+            </div>
+            <div class="document-item">
+              <span>📝 Prescription - Dr. ${patient.doctor.split(' - ')[0]}</span>
+              <button class="small-btn" onclick="alert('Viewing prescription')">View</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    window.logout = function() {
+      localStorage.removeItem('currentPatient');
+      window.location.href = 'index.html';
+    };
+    
+    loadPatientProfile();
+  </script>
+</body>
+</html>

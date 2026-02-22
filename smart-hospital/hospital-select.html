@@ -1,0 +1,30 @@
+<!-- 📁 hospital-select.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Select Role</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="selection-container">
+      <h1>🏥 <span id="hospitalName"></span></h1>
+      <p>Are you a:</p>
+      
+      <div class="selection-buttons">
+        <button class="selection-btn patient-btn" onclick="window.location.href='patient-dashboard.html'">
+          👤 Patient
+        </button>
+        <button class="selection-btn management-btn" onclick="window.location.href='management-login.html'">
+          👥 Hospital Management
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('hospitalName').textContent = 
+      localStorage.getItem('selectedHospitalName') || 'Hospital';
+  </script>
+</body>
+</html>

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment - LifeLink 24/7</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- QR Code Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .payment-container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      animation: slideUp 0.5s ease;
+    }
+    
+    @keyframes slideUp {
+      from {
+        transform: translateY(50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    h1 {
+      color: #2c3e50;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .summary {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 25px;
+    }
+    
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      margin: 10px 0;
+      padding: 5px 0;
+      border-bottom: 1px dashed #ddd;
+    }
+    
+    .queue-preview {
+      background: #e8f5e9;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      text-align: center;
+      font-size: 1.2em;
+    }
+    
+    .queue-number-preview {
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #27ae60;
+    }
+    
+    .qr-section {
+      text-align: center;
+      margin: 30px 0;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+    }
+    
+    #qrcode {
+      display: inline-block;
+      padding: 15px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .payment-details {
+      background: #e8f5e9;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    
+    .amount {
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #27ae60;
+    }
+    
+    .payment-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin: 15px 0;
+    }
+    
+    .payment-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(39,174,96,0.3);
+    }
+    
+    .test-btn {
+      width: 100%;
+      padding: 12px;
+      background: #95a5a6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    
+    .appointment-limit {
+      text-align: center;
+      color: #e74c3c;
+      margin: 10px 0;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="payment-container">
+    <h1><i class="fas fa-qrcode"></i> Complete Payment</h1>
+    
+    <div class="summary">
+      <div class="summary-item">
+        <span>Hospital:</span>
+        <span id="summaryHospital">Loading...</span>
+      </div>
+      <div class="summary-item">
+        <span>Doctor:</span>
+        <span id="summaryDoctor">Loading...</span>
+      </div>
+      <div class="summary-item">
+        <span>Patient:</span>
+        <span id="summaryPatient">Loading...</span>
+      </div>
+      <div class="summary-item">
+        <span>Mobile:</span>
+        <span id="summaryMobile">Loading...</span>
+      </div>
+    </div>
+    
+    <div class="queue-preview">
+      <div>Your Queue Number Will Be</div>
+      <div class="queue-number-preview" id="queuePreview">--</div>
+    </div>
+    
+    <div class="qr-section">
+      <div id="qrcode"></div>
+    </div>
+    
+    <div class="payment-details">
+      <div>Consultation Fee</div>
+      <div class="amount">₹500</div>
+    </div>
+    
+    <div id="limitMessage" class="appointment-limit" style="display: none;">
+      ⚠️ Only 30 appointments available per day
+    </div>
+    
+    <button class="payment-btn" onclick="completePayment()" id="payBtn">
+      <i class="fas fa-check-circle"></i> I've Completed Payment
+    </button>
+    
+    <button class="test-btn" onclick="testPayment()">
+      <i class="fas fa-flask"></i> Test Mode
+    </button>
+  </div>
+
+  <script>
+    // ====================================
+    // LOAD APPOINTMENT DATA
+    // ====================================
+    const hospitalName = localStorage.getItem('selectedHospitalName') || 'Health Care+';
+    const hospitalId = localStorage.getItem('selectedHospitalId') || 'hosp_healthcare_002';
+    const doctorName = localStorage.getItem('selectedDoctor') || 'Doctor';
+    const doctorSpecialist = localStorage.getItem('selectedSpecialist') || '';
+    const patientName = localStorage.getItem('patientName') || 'Patient';
+    const patientMobile = localStorage.getItem('patientMobile') || 'Not provided';
+    
+    document.getElementById('summaryHospital').textContent = hospitalName;
+    document.getElementById('summaryDoctor').textContent = `${doctorName} (${doctorSpecialist})`;
+    document.getElementById('summaryPatient').textContent = patientName;
+    document.getElementById('summaryMobile').textContent = patientMobile;
+    
+    // ====================================
+    // GENERATE SERIAL QUEUE NUMBER (1-30 MAX)
+    // ====================================
+    function getSerialQueueNumber() {
+      const today = new Date().toISOString().split('T')[0];
+      const queueKey = `queue_${hospitalId}_${today}`;
+      const appointmentsKey = `appointments_${hospitalId}_${today}`;
+      
+      // Get current appointments
+      let appointments = JSON.parse(localStorage.getItem(appointmentsKey) || '[]');
+      
+      // Check if max limit reached (30 appointments)
+      if (appointments.length >= 30) {
+        document.getElementById('limitMessage').style.display = 'block';
+        document.getElementById('payBtn').disabled = true;
+        document.getElementById('payBtn').style.opacity = '0.5';
+        return null;
+      }
+      
+      // Generate next queue number
+      const queueNumber = appointments.length + 1;
+      
+      // Store in queue counter
+      localStorage.setItem(queueKey, queueNumber);
+      
+      document.getElementById('queuePreview').textContent = queueNumber;
+      return queueNumber;
+    }
+    
+    const queueNumber = getSerialQueueNumber();
+    
+    if (queueNumber) {
+      // Generate QR Code
+      const upiLink = `upi://pay?pa=hospital@okhdfcbank&pn=LifeLink&am=500&tn=Queue-${queueNumber}&cu=INR`;
+      new QRCode(document.getElementById('qrcode'), {
+        text: upiLink,
+        width: 200,
+        height: 200
+      });
+    }
+    
+    // ====================================
+    // COMPLETE PAYMENT & SAVE APPOINTMENT
+    // ====================================
+    window.completePayment = function() {
+      if (!queueNumber) {
+        alert('No queue number available. Daily limit reached.');
+        return;
+      }
+      
+      const today = new Date().toISOString().split('T')[0];
+      const appointmentsKey = `appointments_${hospitalId}_${today}`;
+      
+      // Create appointment data
+      const appointmentData = {
+        id: 'APT' + Date.now(),
+        queueNumber: queueNumber,
+        hospitalName: hospitalName,
+        hospitalId: hospitalId,
+        doctorName: doctorName,
+        doctorSpecialist: doctorSpecialist,
+        patientName: patientName,
+        patientMobile: patientMobile,
+        date: today,
+        time: new Date().toLocaleTimeString(),
+        status: 'confirmed'
+      };
+      
+      // Save to appointments list
+      let appointments = JSON.parse(localStorage.getItem(appointmentsKey) || '[]');
+      appointments.push(appointmentData);
+      localStorage.setItem(appointmentsKey, JSON.stringify(appointments));
+      
+      // Store current appointment for confirmation page
+      localStorage.setItem('currentQueueNumber', queueNumber);
+      localStorage.setItem('currentAppointment', JSON.stringify(appointmentData));
+      localStorage.setItem('paymentStatus', 'completed');
+      
+      console.log('✅ Appointment saved:', appointmentData);
+      
+      // Redirect to confirmation
+      window.location.href = 'confirmation.html';
+    };
+    
+    // Test mode
+    window.testPayment = function() {
+      completePayment();
+    };
+  </script>
+</body>
+</html>

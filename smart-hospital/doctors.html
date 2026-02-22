@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Available Doctors - LifeLink 24/7</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .hospital-info {
+      background: #f8f9fa;
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      border-left: 4px solid #3498db;
+      font-size: 1.1em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .hospital-id {
+      font-size: 0.8em;
+      color: #666;
+      font-family: monospace;
+    }
+    
+    .doctors-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    
+    .doctor-card {
+      background: #f8f9fa;
+      padding: 25px;
+      border-radius: 10px;
+      border-left: 4px solid #27ae60;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .doctor-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .doctor-name {
+      font-size: 1.3em;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 5px;
+    }
+    
+    .doctor-specialization {
+      color: #3498db;
+      font-weight: 500;
+      margin-bottom: 15px;
+      font-size: 1.1em;
+    }
+    
+    .doctor-details {
+      color: #666;
+      margin: 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .doctor-details i {
+      width: 20px;
+      color: #3498db;
+    }
+    
+    .available-badge {
+      display: inline-block;
+      background: #27ae60;
+      color: white;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.9em;
+      margin: 15px 0;
+    }
+    
+    .book-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+    
+    .book-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102,126,234,0.3);
+    }
+    
+    .no-doctors {
+      text-align: center;
+      padding: 60px;
+      color: #666;
+      font-size: 1.2em;
+      grid-column: 1 / -1;
+    }
+    
+    .no-doctors i {
+      font-size: 3em;
+      color: #95a5a6;
+      margin-bottom: 15px;
+    }
+    
+    .debug-section {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 30px;
+      border-left: 4px solid #e74c3c;
+      font-family: monospace;
+      font-size: 0.9em;
+    }
+    
+    .debug-section h3 {
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+    
+    .debug-content {
+      background: white;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+    
+    .fix-btn {
+      background: #27ae60;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    
+    .fix-btn:hover {
+      background: #219a52;
+    }
+    
+    .back-link {
+      margin-top: 30px;
+      text-align: center;
+    }
+    
+    .back-link a {
+      color: #667eea;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .back-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1><i class="fas fa-user-md"></i> Available Doctors</h1>
+    
+    <div class="hospital-info">
+      <div>
+        <i class="fas fa-hospital"></i> <strong>Hospital:</strong> <span id="hospitalName">Loading...</span>
+      </div>
+      <span class="hospital-id" id="hospitalId">ID: </span>
+    </div>
+    
+    <div id="doctorsContainer" class="doctors-grid">
+      <div class="no-doctors">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Loading doctors...</p>
+      </div>
+    </div>
+    
+    <!-- Debug Section -->
+    <div id="debugSection" class="debug-section">
+      <h3><i class="fas fa-bug"></i> Debug Information</h3>
+      <div id="debugContent" class="debug-content">Loading debug info...</div>
+      <button id="fixBtn" class="fix-btn" onclick="fixDoctors()">
+        <i class="fas fa-wrench"></i> Auto-Fix Doctors
+      </button>
+    </div>
+    
+    <div class="back-link">
+      <a href="patient-dashboard.html"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+    </div>
+  </div>
+
+  <script>
+    // ====================================
+    // GET HOSPITAL INFO
+    // ====================================
+    let hospitalId = 
+      localStorage.getItem('selectedHospitalId') || 
+      localStorage.getItem('hospitalId') || 
+      '';
+    
+    let hospitalName = 
+      localStorage.getItem('selectedHospitalName') || 
+      localStorage.getItem('hospitalName') || 
+      'Health Care+';
+    
+    document.getElementById('hospitalName').textContent = hospitalName;
+    document.getElementById('hospitalId').textContent = `ID: ${hospitalId || 'Not set'}`;
+    
+    console.log("========== DOCTORS PAGE ==========");
+    console.log("Hospital ID:", hospitalId);
+    console.log("Hospital Name:", hospitalName);
+
+    // ====================================
+    // DEBUG FUNCTION - Show all localStorage
+    // ====================================
+    function showDebugInfo() {
+      let debugHtml = '<strong>All localStorage keys:</strong><br>';
+      let doctorKeys = [];
+      
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const value = localStorage.getItem(key);
+        
+        if (key.includes('doctor') || key.includes('Doctor') || key.includes('hosp')) {
+          doctorKeys.push(key);
+          try {
+            const parsed = JSON.parse(value);
+            if (Array.isArray(parsed)) {
+              debugHtml += `📋 ${key}: ${parsed.length} doctors found<br>`;
+            } else {
+              debugHtml += `🔑 ${key}: ${value.substring(0, 50)}...<br>`;
+            }
+          } catch {
+            debugHtml += `🔑 ${key}: ${value}<br>`;
+          }
+        }
+      }
+      
+      if (doctorKeys.length === 0) {
+        debugHtml += '❌ No doctor-related keys found<br>';
+      }
+      
+      document.getElementById('debugContent').innerHTML = debugHtml;
+    }
+
+    // ====================================
+    // FIND ALL DOCTORS IN STORAGE
+    // ====================================
+    function findAllDoctors() {
+      let allDoctors = [];
+      let foundKeys = [];
+      
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.includes('doctor') || key.includes('Doctor') || key.includes('Doctor')) {
+          try {
+            const value = JSON.parse(localStorage.getItem(key));
+            if (Array.isArray(value)) {
+              allDoctors = [...allDoctors, ...value];
+              foundKeys.push(key);
+            }
+          } catch (e) {}
+        }
+      }
+      
+      return { allDoctors, foundKeys };
+    }
+
+    // ====================================
+    // AUTO-FIX DOCTORS FUNCTION
+    // ====================================
+    window.fixDoctors = function() {
+      const { allDoctors, foundKeys } = findAllDoctors();
+      
+      if (allDoctors.length === 0) {
+        alert('❌ No doctors found anywhere in storage! Please add doctors first.');
+        return;
+      }
+      
+      // Save to correct hospital ID
+      const targetKey = `doctors_${hospitalId}`;
+      localStorage.setItem(targetKey, JSON.stringify(allDoctors));
+      
+      // Also save to generic key as backup
+      localStorage.setItem('doctors', JSON.stringify(allDoctors));
+      
+      console.log(`✅ Fixed: Saved ${allDoctors.length} doctors to ${targetKey}`);
+      alert(`✅ Fixed! ${allDoctors.length} doctors saved to ${hospitalName}`);
+      
+      showDebugInfo();
+      loadDoctors();
+    };
+
+    // ====================================
+    // LOAD DOCTORS FUNCTION
+    // ====================================
+    function loadDoctors() {
+      const container = document.getElementById('doctorsContainer');
+      let doctors = [];
+      let source = '';
+      
+      // Method 1: Try specific hospital ID
+      if (hospitalId) {
+        const specificKey = `doctors_${hospitalId}`;
+        try {
+          doctors = JSON.parse(localStorage.getItem(specificKey)) || [];
+          if (doctors.length > 0) source = specificKey;
+        } catch (e) {}
+      }
+      
+      // Method 2: Try generic doctors key
+      if (doctors.length === 0) {
+        try {
+          doctors = JSON.parse(localStorage.getItem('doctors')) || [];
+          if (doctors.length > 0) source = 'doctors';
+        } catch (e) {}
+      }
+      
+      // Method 3: Search all keys
+      if (doctors.length === 0) {
+        const { allDoctors } = findAllDoctors();
+        doctors = allDoctors;
+        if (doctors.length > 0) source = 'multiple keys';
+      }
+      
+      console.log(`Found ${doctors.length} doctors from ${source || 'none'}`);
+      
+      // Filter only present doctors
+      const availableDoctors = doctors.filter(d => d.status === 'present');
+      
+      if (availableDoctors.length === 0) {
+        container.innerHTML = `
+          <div class="no-doctors">
+            <i class="fas fa-user-md"></i>
+            <p>No doctors available at the moment.</p>
+            <p style="font-size: 0.9em; color: #95a5a6;">
+              ${doctors.length > 0 ? 
+                '⚠️ Doctors exist but are marked as absent.' : 
+                '📋 No doctors have been added yet.'}
+            </p>
+          </div>
+        `;
+      } else {
+        container.innerHTML = availableDoctors.map(doctor => `
+          <div class="doctor-card">
+            <div class="doctor-name">👨‍⚕️ Dr. ${doctor.name}</div>
+            <div class="doctor-specialization">${doctor.specialization}</div>
+            <div class="doctor-details">
+              <i class="fas fa-graduation-cap"></i> ${doctor.qualification || 'Not specified'}
+            </div>
+            <div class="doctor-details">
+              <i class="fas fa-clock"></i> ${doctor.experience || 0} years
+            </div>
+            <div class="available-badge">
+              <i class="fas fa-check-circle"></i> Available Today
+            </div>
+            <button class="book-btn" onclick="bookDoctor('${doctor.name}', '${doctor.specialization}')">
+              <i class="fas fa-calendar-check"></i> Book Appointment
+            </button>
+          </div>
+        `).join('');
+      }
+      
+      showDebugInfo();
+    }
+    
+    window.bookDoctor = function(name, spec) {
+      localStorage.setItem('selectedDoctor', name);
+      localStorage.setItem('selectedSpecialist', spec);
+      window.location.href = 'patient-form.html';
+    };
+    
+    // Load doctors on page load
+    loadDoctors();
+  </script>
+</body>
+</html>

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login - LifeLink 24/7</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .login-container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      animation: slideUp 0.5s ease;
+    }
+    
+    @keyframes slideUp {
+      from {
+        transform: translateY(50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    .logo {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .logo i {
+      font-size: 3.5em;
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+    
+    .logo h1 {
+      color: #2c3e50;
+      font-size: 2em;
+      margin-bottom: 5px;
+    }
+    
+    .logo p {
+      color: #666;
+      font-size: 0.9em;
+    }
+    
+    .login-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .login-header h2 {
+      color: #2c3e50;
+      font-size: 1.5em;
+      margin-bottom: 5px;
+    }
+    
+    .login-header p {
+      color: #666;
+      font-size: 0.9em;
+    }
+    
+    .admin-badge {
+      background: #9b59b6;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 20px;
+      display: inline-block;
+      font-size: 0.9em;
+      margin-bottom: 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #2c3e50;
+      font-weight: 500;
+    }
+    
+    .form-group label i {
+      color: #9b59b6;
+      margin-right: 5px;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 14px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 1em;
+      transition: all 0.3s;
+      box-sizing: border-box;
+    }
+    
+    .form-group input:focus {
+      border-color: #9b59b6;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(155,89,182,0.1);
+    }
+    
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0 10px;
+    }
+    
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(155,89,182,0.3);
+    }
+    
+    .error-message {
+      background: #fee;
+      color: #e74c3c;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 15px 0;
+      text-align: center;
+      display: none;
+    }
+    
+    .error-message.show {
+      display: block;
+    }
+    
+    .admin-info {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      border: 1px dashed #9b59b6;
+    }
+    
+    .admin-info h3 {
+      color: #2c3e50;
+      margin-bottom: 10px;
+      font-size: 1.1em;
+    }
+    
+    .admin-info p {
+      margin: 8px 0;
+      color: #666;
+    }
+    
+    .admin-info strong {
+      color: #9b59b6;
+    }
+    
+    .back-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+    
+    .back-link a {
+      color: #667eea;
+      text-decoration: none;
+      font-size: 0.95em;
+    }
+    
+    .back-link a:hover {
+      text-decoration: underline;
+    }
+    
+    .loader {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #9b59b6;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="logo">
+      <i class="fas fa-user-tie"></i>
+      <h1>Admin Portal</h1>
+      <p>System Administration</p>
+    </div>
+    
+    <div class="login-header">
+      <span class="admin-badge"><i class="fas fa-shield-alt"></i> Admin Access Only</span>
+      <h2>Admin Login</h2>
+      <p>Enter your admin credentials</p>
+    </div>
+    
+    <div id="errorMessage" class="error-message"></div>
+    
+    <div class="form-group">
+      <label><i class="fas fa-envelope"></i> Admin Email</label>
+      <input type="email" id="email" placeholder="Enter admin email">
+    </div>
+    
+    <div class="form-group">
+      <label><i class="fas fa-lock"></i> Password</label>
+      <input type="password" id="password" placeholder="Enter password">
+    </div>
+    
+    <button class="login-btn" onclick="handleAdminLogin()" id="loginBtn">
+      <i class="fas fa-sign-in-alt"></i> Login to Admin Panel
+    </button>
+    
+    <div class="admin-info">
+      <h3><i class="fas fa-info-circle"></i> Admin Credentials:</h3>
+      <p><strong>Super Admin:</strong> admin@lifelink.com / Admin@123</p>
+      <p><strong>Hospital Admin:</strong> admin@hospital.com / admin123</p>
+    </div>
+    
+    <div class="back-link">
+      <a href="management-dashboard.html"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+    </div>
+  </div>
+
+  <script>
+    // ====================================
+    // ADMIN DATABASE
+    // ====================================
+    const adminAccounts = {
+      'admin@lifelink.com': {
+        id: 'admin_super_001',
+        name: 'Super Admin',
+        password: 'Admin@123',
+        role: 'superadmin',
+        permissions: ['all']
+      },
+      'admin@hospital.com': {
+        id: 'admin_hosp_001',
+        name: 'Hospital Admin',
+        password: 'admin123',
+        role: 'hospitaladmin',
+        permissions: ['manage_hospitals', 'manage_doctors']
+      },
+      'superadmin@system.com': {
+        id: 'admin_super_002',
+        name: 'System Admin',
+        password: 'System@123',
+        role: 'superadmin',
+        permissions: ['all']
+      }
+    };
+
+    // ====================================
+    // ADMIN LOGIN FUNCTION
+    // ====================================
+    window.handleAdminLogin = function() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const errorMessage = document.getElementById('errorMessage');
+      const loginBtn = document.getElementById('loginBtn');
+      
+      errorMessage.classList.remove('show');
+      
+      if (!email || !password) {
+        errorMessage.textContent = 'Please enter email and password';
+        errorMessage.classList.add('show');
+        return;
+      }
+      
+      loginBtn.innerHTML = '<span class="loader"></span> Verifying...';
+      loginBtn.disabled = true;
+      
+      setTimeout(() => {
+        const admin = adminAccounts[email];
+        
+        if (admin && admin.password === password) {
+          // Store admin session
+          localStorage.setItem('adminId', admin.id);
+          localStorage.setItem('adminName', admin.name);
+          localStorage.setItem('adminEmail', email);
+          localStorage.setItem('adminRole', admin.role);
+          localStorage.setItem('adminPermissions', JSON.stringify(admin.permissions));
+          localStorage.setItem('isAdminLoggedIn', 'true');
+          
+          console.log('✅ Admin login successful:', admin.name);
+          
+          // Redirect to admin dashboard
+          window.location.href = 'admin-dashboard.html';
+        } else {
+          errorMessage.textContent = 'Invalid admin credentials';
+          errorMessage.classList.add('show');
+          loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login to Admin Panel';
+          loginBtn.disabled = false;
+        }
+      }, 1000);
+    };
+  </script>
+</body>
+</html>
